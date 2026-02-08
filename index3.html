@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body{
+            background: linear-gradient(#301163, #633f9c);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            color: white;
+        }
+        .container{
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+
+        }
+        .mode-btns{
+            display: flex;
+            justify-content: center;
+            column-gap: 25px;
+            margin-bottom: 20px;
+        }
+        .btn{
+            border: 1px solid floralwhite;
+            background: none;
+            padding: 20px 25px;
+            font-size: 24px;
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            border-radius: 15px;
+            box-shadow: 2px 2px 2px 2px #fff;
+            color: #fff;
+        }
+        .btn:hover{
+            color: aqua;
+            transition: color 3s;
+        }
+        .navigation{
+            display: flex;
+            justify-content: center;
+            column-gap: 30px;
+            padding: 15px ;
+        }
+        .btn-nav{
+            background: #fff;
+            border-radius: 50%;
+            border: none;
+            padding: 20px;
+            font-size: 20PX;
+            opacity: 0.8;
+        }
+        .btn-nav:hover{
+            opacity: 1;
+            transition: opacity 1s;
+        }
+        .current-date{
+            display: flex;
+            align-items: center;
+            color: white;
+            font-size: 24px;
+        }
+        .calendar-container{
+            margin-top: 30px;
+            background: rgb(255, 255, 255); 
+            border-radius: 6px;
+            padding: 30px;
+        }
+        .week-days{
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            font-size: 18px;
+            color: black;
+            gap: 5px;
+
+        }
+        .week-day{
+            background: rgb(197, 196, 196);
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="controls">
+            <div class="mode-btns">
+                <button class="btn" id="monthbtn">Месяц</button>
+                <button class="btn" id="weekbtn">Неделя</button>
+                <button class="btn" id="yearbtn">Год</button>
+            </div>
+        </div>
+        <div class="navigation">
+            <button class="btn-nav" id="btn-prev">←</button>
+            <div class="current-date">{{currentDate}}</div>
+            <button class="btn-nav" id="btn-next">→</button>
+        </div>
+        <div class="calendar-container">
+            <div class="moth-view">
+                 <div class="week-days">
+                    <div class="week-day">Пн</div>
+                    <div class="week-day">Вт</div>
+                    <div class="week-day">Ср</div>
+                    <div class="week-day">Чт</div>
+                    <div class="week-day">Пт</div>
+                    <div class="week-day">Сб</div>
+                    <div class="week-day">Вс</div>
+                 </div>
+                 <div class="month-days"></div>
+            </div>
+           <div class="week-view"></div>
+           <div class="year-view"></div>
+        </div>
+    </div>
+</body> 
+<script>
+    let currentDate = new Date()
+</script>
+</html>

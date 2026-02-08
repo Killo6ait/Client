@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Календарь обслуживания ТА</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #34495e;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            border-radius: var(--border-radius);
+            margin-bottom: 30px;
+            box-shadow: var(--box-shadow);
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .view-mode, .calendar-type, .filter-section {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        h3 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--light-color);
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 10px 18px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-primary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+        }
+        
+        .btn-active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 15px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .color-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        
+        .color-green {
+            background-color: var(--success-color);
+        }
+        
+        .color-yellow {
+            background-color: var(--warning-color);
+        }
+        
+        .color-red {
+            background-color: var(--danger-color);
+        }
+        
+        .calendar-container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 20px;
+            margin-bottom: 30px;
+            min-height: 600px;
+        }
+        
+        .month-calendar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+        
+        @media (max-width: 1200px) {
+            .month-calendar {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (max-width: 900px) {
+            .month-calendar {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .month-calendar {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .month-box {
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            padding: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .month-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .month-header {
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .month-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+        
+        .day-header {
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.85rem;
+            color: var(--dark-color);
+            padding: 5px 0;
+        }
+        
+        .day {
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .day.empty {
+            background-color: transparent;
+            cursor: default;
+        }
+        
+        .day.has-event {
+            font-weight: bold;
+        }
+        
+        .event-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--primary-color);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .day:hover .event-tooltip {
+            opacity: 1;
+        }
+        
+        .week-calendar, .single-month-calendar {
+            display: none;
+        }
+        
+        .week-calendar {
+            overflow-x: auto;
+        }
+        
+        .week-header {
+            display: grid;
+            grid-template-columns: 100px repeat(7, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            background-color: var(--light-color);
+            padding: 15px;
+            border-radius: var(--border-radius);
+        }
+        
+        .week-day {
+            text-align: center;
+        }
+        
+        .week-grid {
+            display: grid;
+            grid-template-columns: 100px repeat(7, 1fr);
+            gap: 10px;
+        }
+        
+        .time-slot {
+            padding: 15px;
+            border-right: 1px solid #eee;
+            font-weight: bold;
+            color: var(--dark-color);
+        }
+        
+        .week-day-events {
+            min-height: 100px;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: var(--border-radius);
+        }
+        
+        .event-item {
+            padding: 8px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+        
+        .event-green {
+            background-color: rgba(39, 174, 96, 0.15);
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .event-yellow {
+            background-color: rgba(243, 156, 18, 0.15);
+            border-left: 4px solid var(--warning-color);
+        }
+        
+        .event-red {
+            background-color: rgba(231, 76, 60, 0.15);
+            border-left: 4px solid var(--danger-color);
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-top: 30px;
+            border-top: 1px solid #eee;
+        }
+        
+        .active-calendar {
+            display: block;
+        }
+        
+        .ta-info-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark-color);
+        }
+        
+        .modal-title {
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        
+        .ta-detail {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .ta-detail:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-label {
+            font-weight: bold;
+            color: var(--dark-color);
+            margin-bottom: 5px;
+        }
+        
+        .detail-value {
+            color: #555;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        
+        .status-planned {
+            background-color: rgba(39, 174, 96, 0.2);
+            color: var(--success-color);
+        }
+        
+        .status-upcoming {
+            background-color: rgba(243, 156, 18, 0.2);
+            color: var(--warning-color);
+        }
+        
+        .status-overdue {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: var(--danger-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-calendar-alt"></i> Календарь обслуживания ТА</h1>
+            <p>График технического обслуживания и мониторинга технических аппаратов</p>
+        </header>
+        
+        <div class="controls">
+            <div class="view-mode">
+                <h3>Режим отображения</h3>
+                <div class="btn-group">
+                    <button id="all-ta-mode" class="btn-primary btn-active">
+                        <i class="fas fa-layer-group"></i> Все ТА
+                    </button>
+                    <button id="single-ta-mode" class="btn-secondary">
+                        <i class="fas fa-filter"></i> Один ТА
+                    </button>
+                </div>
+            </div>
+            
+            <div class="calendar-type">
+                <h3>Тип календаря</h3>
+                <div class="btn-group">
+                    <button id="year-view" class="btn-primary btn-active">
+                        <i class="fas fa-calendar"></i> Год
+                    </button>
+                    <button id="month-view" class="btn-secondary">
+                        <i class="fas fa-calendar-week"></i> Месяц
+                    </button>
+                    <button id="week-view" class="btn-secondary">
+                        <i class="fas fa-calendar-day"></i> Неделя
+                    </button>
+                </div>
+            </div>
+            
+            <div class="filter-section">
+                <h3>Фильтр по ТА</h3>
+                <select id="ta-filter">
+                    <option value="all">Все технические аппараты</option>
+                    <option value="TA-001">ТА-001: Кофемашина Deluxe</option>
+                    <option value="TA-002">ТА-002: Холодильник Industrial</option>
+                    <option value="TA-003">ТА-003: Пекарский шкаф Pro</option>
+                    <option value="TA-004">ТА-004: Посудомойка Commercial</option>
+                    <option value="TA-005">ТА-005: Миксер Heavy Duty</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="color-box color-green"></div>
+                <span>Плановое ТО</span>
+            </div>
+            <div class="legend-item">
+                <div class="color-box color-yellow"></div>
+                <span>Приближающийся срок (менее 5 дней)</span>
+            </div>
+            <div class="legend-item">
+                <div class="color-box color-red"></div>
+                <span>Просроченные мероприятия</span>
+            </div>
+        </div>
+        
+        <div class="calendar-container">
+            <div id="year-calendar" class="year-calendar active-calendar">
+                <div class="month-calendar" id="months-container">
+                    <!-- Месяцы будут добавлены через JavaScript -->
+                </div>
+            </div>
+            
+            <div id="month-calendar" class="single-month-calendar">
+                <div class="month-header" id="current-month-header"></div>
+                <div class="month-days" id="single-month-days">
+                    <!-- Дни месяца будут добавлены через JavaScript -->
+                </div>
+            </div>
+            
+            <div id="week-calendar" class="week-calendar">
+                <div class="week-header">
+                    <div class="time-slot">Время/ТА</div>
+                    <div class="week-day">Понедельник</div>
+                    <div class="week-day">Вторник</div>
+                    <div class="week-day">Среда</div>
+                    <div class="week-day">Четверг</div>
+                    <div class="week-day">Пятница</div>
+                    <div class="week-day">Суббота</div>
+                    <div class="week-day">Воскресенье</div>
+                </div>
+                <div class="week-grid" id="week-grid">
+                    <!-- События недели будут добавлены через JavaScript -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Система автоматического формирования графика технического обслуживания ТА</p>
+            <p>© 2025 Все права защищены. Алгоритм расчета: Дата следующего ТО = Дата последней проверки + Интервал</p>
+        </div>
+    </div>
+    
+    <!-- Модальное окно с информацией о ТА -->
+    <div id="ta-info-modal" class="ta-info-modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 class="modal-title">Информация о техническом аппарате</h2>
+            <div id="ta-details">
+                <!-- Информация о ТА будет загружена через JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Данные о технических аппаратах
+        const technicalApparatuses = [
+            {
+                id: "TA-001",
+                name: "Кофемашина Deluxe",
+                model: "CoffeeMaster Pro 5000",
+                location: "Кафе 'Утренний эспрессо', ул. Центральная, 15",
+                franchise: "Кофейная франшиза 'Brew&Go'",
+                lastCheck: "2025-05-01",
+                interval: 6, // месяцев
+                resource: 10000, // часов
+                usage: 8200, // текущая наработка в часах
+                nextService: "2025-11-01"
+            },
+            {
+                id: "TA-002",
+                name: "Холодильник Industrial",
+                model: "ColdKeep Industrial X3",
+                location: "Ресторан 'Морозко', пр. Промышленный, 42",
+                franchise: "Ресторанная сеть 'Сибирский тракт'",
+                lastCheck: "2025-06-15",
+                interval: 12, // месяцев
+                resource: 20000, // часов
+                usage: 18500, // текущая наработка в часах
+                nextService: "2026-06-15"
+            },
+            {
+                id: "TA-003",
+                name: "Пекарский шкаф Pro",
+                model: "BakePro Master 300",
+                location: "Пекарня 'Сдобный угол', ул. Хлебная, 7",
+                franchise: "Пекарная франшиза 'Golden Crust'",
+                lastCheck: "2025-07-10",
+                interval: 3, // месяцев
+                resource: 5000, // часов
+                usage: 4300, // текущая наработка в часах
+                nextService: "2025-10-10"
+            },
+            {
+                id: "TA-004",
+                name: "Посудомойка Commercial",
+                model: "WashMaster Commercial Plus",
+                location: "Столовая 'Быстрое питание', ул. Рабочая, 23",
+                franchise: "Сеть быстрого питания 'QuickMeal'",
+                lastCheck: "2025-08-20",
+                interval: 4, // месяцев
+                resource: 15000, // часов
+                usage: 12500, // текущая наработка в часах
+                nextService: "2025-12-20"
+            },
+            {
+                id: "TA-005",
+                name: "Миксер Heavy Duty",
+                model: "MixForce HD 1000",
+                location: "Кондитерская 'Сладкая жизнь', ул. Сахарная, 12",
+                franchise: "Кондитерская сеть 'Sweet Empire'",
+                lastCheck: "2025-09-05",
+                interval: 2, // месяцев
+                resource: 8000, // часов
+                usage: 7200, // текущая наработка в часах
+                nextService: "2025-11-05"
+            }
+        ];
+
+        // События обслуживания (генерируем на основе данных ТА)
+        const serviceEvents = generateServiceEvents(technicalApparatuses);
+        
+        // Текущая дата для расчета
+        const currentDate = new Date('2025-10-15');
+        
+        // Элементы DOM
+        const allTaModeBtn = document.getElementById('all-ta-mode');
+        const singleTaModeBtn = document.getElementById('single-ta-mode');
+        const yearViewBtn = document.getElementById('year-view');
+        const monthViewBtn = document.getElementById('month-view');
+        const weekViewBtn = document.getElementById('week-view');
+        const taFilter = document.getElementById('ta-filter');
+        const yearCalendar = document.getElementById('year-calendar');
+        const monthCalendar = document.getElementById('month-calendar');
+        const weekCalendar = document.getElementById('week-calendar');
+        const monthsContainer = document.getElementById('months-container');
+        const singleMonthDays = document.getElementById('single-month-days');
+        const currentMonthHeader = document.getElementById('current-month-header');
+        const weekGrid = document.getElementById('week-grid');
+        const taInfoModal = document.getElementById('ta-info-modal');
+        const closeModalBtn = document.querySelector('.close-modal');
+        const taDetails = document.getElementById('ta-details');
+        
+        // Текущие настройки отображения
+        let currentMode = 'all'; // 'all' или 'single'
+        let currentView = 'year'; // 'year', 'month' или 'week'
+        let selectedTA = 'all';
+        
+        // Инициализация страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCalendar();
+            setupEventListeners();
+            renderYearCalendar();
+        });
+        
+        // Настройка обработчиков событий
+        function setupEventListeners() {
+            // Переключение режимов отображения
+            allTaModeBtn.addEventListener('click', function() {
+                setMode('all');
+            });
+            
+            singleTaModeBtn.addEventListener('click', function() {
+                setMode('single');
+            });
+            
+            // Переключение типов календаря
+            yearViewBtn.addEventListener('click', function() {
+                setView('year');
+            });
+            
+            monthViewBtn.addEventListener('click', function() {
+                setView('month');
+            });
+            
+            weekViewBtn.addEventListener('click', function() {
+                setView('week');
+            });
+            
+            // Фильтр по ТА
+            taFilter.addEventListener('change', function() {
+                selectedTA = this.value;
+                updateCalendar();
+            });
+            
+            // Закрытие модального окна
+            closeModalBtn.addEventListener('click', function() {
+                taInfoModal.style.display = 'none';
+            });
+            
+            // Закрытие модального окна при клике вне его
+            window.addEventListener('click', function(event) {
+                if (event.target === taInfoModal) {
+                    taInfoModal.style.display = 'none';
+                }
+            });
+        }
+        
+        // Установка режима отображения
+        function setMode(mode) {
+            currentMode = mode;
+            
+            // Обновление кнопок
+            if (mode === 'all') {
+                allTaModeBtn.classList.remove('btn-secondary');
+                allTaModeBtn.classList.add('btn-primary', 'btn-active');
+                singleTaModeBtn.classList.remove('btn-primary', 'btn-active');
+                singleTaModeBtn.classList.add('btn-secondary');
+                taFilter.disabled = true;
+            } else {
+                singleTaModeBtn.classList.remove('btn-secondary');
+                singleTaModeBtn.classList.add('btn-primary', 'btn-active');
+                allTaModeBtn.classList.remove('btn-primary', 'btn-active');
+                allTaModeBtn.classList.add('btn-secondary');
+                taFilter.disabled = false;
+            }
+            
+            updateCalendar();
+        }
+        
+        // Установка типа календаря
+        function setView(view) {
+            currentView = view;
+            
+            // Скрыть все календари
+            yearCalendar.classList.remove('active-calendar');
+            monthCalendar.classList.remove('active-calendar');
+            weekCalendar.classList.remove('active-calendar');
+            
+            // Обновление кнопок
+            yearViewBtn.classList.remove('btn-primary', 'btn-active');
+            monthViewBtn.classList.remove('btn-primary', 'btn-active');
+            weekViewBtn.classList.remove('btn-primary', 'btn-active');
+            
+            yearViewBtn.classList.add('btn-secondary');
+            monthViewBtn.classList.add('btn-secondary');
+            weekViewBtn.classList.add('btn-secondary');
+            
+            // Показать выбранный календарь
+            if (view === 'year') {
+                yearCalendar.classList.add('active-calendar');
+                yearViewBtn.classList.remove('btn-secondary');
+                yearViewBtn.classList.add('btn-primary', 'btn-active');
+                renderYearCalendar();
+            } else if (view === 'month') {
+                monthCalendar.classList.add('active-calendar');
+                monthViewBtn.classList.remove('btn-secondary');
+                monthViewBtn.classList.add('btn-primary', 'btn-active');
+                renderMonthCalendar();
+            } else if (view === 'week') {
+                weekCalendar.classList.add('active-calendar');
+                weekViewBtn.classList.remove('btn-secondary');
+                weekViewBtn.classList.add('btn-primary', 'btn-active');
+                renderWeekCalendar();
+            }
+        }
+        
+        // Инициализация календаря
+        function initializeCalendar() {
+            // Устанавливаем текущий месяц в заголовок
+            const monthNames = [
+                "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+                "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
+            ];
+            
+            const currentMonth = currentDate.getMonth();
+            currentMonthHeader.textContent = `${monthNames[currentMonth]} ${currentDate.getFullYear()}`;
+        }
+        
+        // Обновление календаря при изменении параметров
+        function updateCalendar() {
+            if (currentView === 'year') {
+                renderYearCalendar();
+            } else if (currentView === 'month') {
+                renderMonthCalendar();
+            } else if (currentView === 'week') {
+                renderWeekCalendar();
+            }
+        }
+        
+        // Генерация событий обслуживания на основе данных ТА
+        function generateServiceEvents(taList) {
+            const events = [];
+            
+            taList.forEach(ta => {
+                // Событие на основе даты последней проверки и интервала
+                const lastCheckDate = new Date(ta.lastCheck);
+                const nextServiceDate = new Date(ta.nextService);
+                
+                // Добавляем событие планового ТО
+                events.push({
+                    taId: ta.id,
+                    taName: ta.name,
+                    date: nextServiceDate,
+                    type: 'planned',
+                    status: getEventStatus(nextServiceDate),
+                    details: `Плановое ТО: ${ta.name}`
+                });
+                
+                // Добавляем событие на основе ресурса (80-90% лимита)
+                const resourceLimit = ta.resource * 0.85; // 85% от ресурса
+                if (ta.usage >= resourceLimit * 0.9) {
+                    // Если текущая наработка близка к лимиту
+                    const resourceEventDate = new Date(currentDate);
+                    resourceEventDate.setDate(resourceEventDate.getDate() + 7); // Через 7 дней
+                    
+                    events.push({
+                        taId: ta.id,
+                        taName: ta.name,
+                        date: resourceEventDate,
+                        type: 'resource',
+                        status: getEventStatus(resourceEventDate),
+                        details: `ТО по ресурсу: ${ta.name} (достигнуто ${Math.round(ta.usage/ta.resource*100)}% ресурса)`
+                    });
+                }
+                
+                // Добавляем события на ближайшие 3 месяца для демонстрации
+                for (let i = 1; i <= 3; i++) {
+                    const eventDate = new Date(nextServiceDate);
+                    eventDate.setMonth(eventDate.getMonth() + i * ta.interval);
+                    
+                    events.push({
+                        taId: ta.id,
+                        taName: ta.name,
+                        date: eventDate,
+                        type: 'planned',
+                        status: 'planned',
+                        details: `Плановое ТО: ${ta.name}`
+                    });
+                }
+            });
+            
+            return events;
+        }
+        
+        // Определение статуса события на основе даты
+        function getEventStatus(eventDate) {
+            const today = currentDate;
+            const timeDiff = eventDate.getTime() - today.getTime();
+            const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+            
+            if (daysDiff < 0) {
+                return 'overdue'; // Просрочено
+            } else if (daysDiff <= 5) {
+                return 'upcoming'; // Приближается (менее 5 дней)
+            } else {
+                return 'planned'; // Плановое
+            }
+        }
+        
+        // Получение событий для отображения в зависимости от режима
+        function getFilteredEvents() {
+            if (currentMode === 'all') {
+                return serviceEvents;
+            } else {
+                return serviceEvents.filter(event => event.taId === selectedTA);
+            }
+        }
+        
+        // Отрисовка годового календаря
+        function renderYearCalendar() {
+            monthsContainer.innerHTML = '';
+            
+            const monthNames = [
+                "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+                "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
+            ];
+            
+            const filteredEvents = getFilteredEvents();
+            
+            // Создаем календарь на 12 месяцев
+            for (let month = 0; month < 12; month++) {
+                const monthBox = document.createElement('div');
+                monthBox.className = 'month-box';
+                
+                const monthHeader = document.createElement('div');
+                monthHeader.className = 'month-header';
+                monthHeader.textContent = monthNames[month] + ' 2025';
+                
+                const monthDays = document.createElement('div');
+                monthDays.className = 'month-days';
+                
+                // Заголовки дней недели
+                const dayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+                dayNames.forEach(dayName => {
+                    const dayHeader = document.createElement('div');
+                    dayHeader.className = 'day-header';
+                    dayHeader.textContent = dayName;
+                    monthDays.appendChild(dayHeader);
+                });
+                
+                // Первый день месяца
+                const firstDay = new Date(2025, month, 1);
+                const startingDay = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1; // Корректировка для понедельника
+                
+                // Пустые ячейки до первого дня месяца
+                for (let i = 0; i < startingDay; i++) {
+                    const emptyDay = document.createElement('div');
+                    emptyDay.className = 'day empty';
+                    monthDays.appendChild(emptyDay);
+                }
+                
+                // Количество дней в месяце
+                const daysInMonth = new Date(2025, month + 1, 0).getDate();
+                
+                // События в этом месяце
+                const monthEvents = filteredEvents.filter(event => {
+                    return event.date.getFullYear() === 2025 && event.date.getMonth() === month;
+                });
+                
+                // Создаем дни месяца
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dayElement = document.createElement('div');
+                    dayElement.className = 'day';
+                    dayElement.textContent = day;
+                    
+                    // Проверяем, есть ли события в этот день
+                    const dayEvents = monthEvents.filter(event => event.date.getDate() === day);
+                    
+                    if (dayEvents.length > 0) {
+                        dayElement.classList.add('has-event');
+                        
+                        // Определяем самый критичный статус события в этот день
+                        let dayStatus = 'planned';
+                        if (dayEvents.some(event => event.status === 'overdue')) {
+                            dayStatus = 'overdue';
+                        } else if (dayEvents.some(event => event.status === 'upcoming')) {
+                            dayStatus = 'upcoming';
+                        }
+                        
+                        // Устанавливаем цвет в зависимости от статуса
+                        if (dayStatus === 'planned') {
+                            dayElement.style.backgroundColor = 'rgba(39, 174, 96, 0.2)';
+                            dayElement.style.color = '#27ae60';
+                        } else if (dayStatus === 'upcoming') {
+                            dayElement.style.backgroundColor = 'rgba(243, 156, 18, 0.2)';
+                            dayElement.style.color = '#f39c12';
+                        } else if (dayStatus === 'overdue') {
+                            dayElement.style.backgroundColor = 'rgba(231, 76, 60, 0.2)';
+                            dayElement.style.color = '#e74c3c';
+                        }
+                        
+                        // Создаем тултип с информацией о событиях
+                        const tooltip = document.createElement('div');
+                        tooltip.className = 'event-tooltip';
+                        
+                        let tooltipContent = `<strong>${day}.${month+1}.2025</strong><br>`;
+                        dayEvents.forEach(event => {
+                            tooltipContent += `${event.taName}<br>`;
+                        });
+                        
+                        tooltip.innerHTML = tooltipContent;
+                        dayElement.appendChild(tooltip);
+                        
+                        // Добавляем обработчик клика для показа информации о ТА
+                        dayElement.addEventListener('click', function() {
+                            showTAInfo(dayEvents[0].taId);
+                        });
+                    }
+                    
+                    monthDays.appendChild(dayElement);
+                }
+                
+                monthBox.appendChild(monthHeader);
+                monthBox.appendChild(monthDays);
+                monthsContainer.appendChild(monthBox);
+            }
+        }
+        
+        // Отрисовка месячного календаря
+        function renderMonthCalendar() {
+            singleMonthDays.innerHTML = '';
+            
+            const monthNames = [
+                "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+                "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
+            ];
+            
+            const currentMonth = currentDate.getMonth();
+            currentMonthHeader.textContent = `${monthNames[currentMonth]} ${currentDate.getFullYear()}`;
+            
+            // Заголовки дней недели
+            const dayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+            dayNames.forEach(dayName => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'day-header';
+                dayHeader.textContent = dayName;
+                singleMonthDays.appendChild(dayHeader);
+            });
+            
+            // Первый день месяца
+            const firstDay = new Date(currentDate.getFullYear(), currentMonth, 1);
+            const startingDay = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1; // Корректировка для понедельника
+            
+            // Пустые ячейки до первого дня месяца
+            for (let i = 0; i < startingDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'day empty';
+                singleMonthDays.appendChild(emptyDay);
+            }
+            
+            // Количество дней в месяце
+            const daysInMonth = new Date(currentDate.getFullYear(), currentMonth + 1, 0).getDate();
+            
+            // События в этом месяце
+            const filteredEvents = getFilteredEvents();
+            const monthEvents = filteredEvents.filter(event => {
+                return event.date.getFullYear() === currentDate.getFullYear() && 
+                       event.date.getMonth() === currentMonth;
+            });
+            
+            // Создаем дни месяца
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'day';
+                dayElement.textContent = day;
+                
+                // Проверяем, есть ли события в этот день
+                const dayEvents = monthEvents.filter(event => event.date.getDate() === day);
+                
+                if (dayEvents.length > 0) {
+                    dayElement.classList.add('has-event');
+                    
+                    // Определяем самый критичный статус события в этот день
+                    let dayStatus = 'planned';
+                    if (dayEvents.some(event => event.status === 'overdue')) {
+                        dayStatus = 'overdue';
+                    } else if (dayEvents.some(event => event.status === 'upcoming')) {
+                        dayStatus = 'upcoming';
+                    }
+                    
+                    // Устанавливаем цвет в зависимости от статуса
+                    if (dayStatus === 'planned') {
+                        dayElement.style.backgroundColor = 'rgba(39, 174, 96, 0.3)';
+                        dayElement.style.color = '#27ae60';
+                        dayElement.style.fontWeight = 'bold';
+                    } else if (dayStatus === 'upcoming') {
+                        dayElement.style.backgroundColor = 'rgba(243, 156, 18, 0.3)';
+                        dayElement.style.color = '#f39c12';
+                        dayElement.style.fontWeight = 'bold';
+                    } else if (dayStatus === 'overdue') {
+                        dayElement.style.backgroundColor = 'rgba(231, 76, 60, 0.3)';
+                        dayElement.style.color = '#e74c3c';
+                        dayElement.style.fontWeight = 'bold';
+                    }
+                    
+                    // Создаем тултип с информацией о событиях
+                    const tooltip = document.createElement('div');
+                    tooltip.className = 'event-tooltip';
+                    
+                    let tooltipContent = `<strong>${day}.${currentMonth+1}.${currentDate.getFullYear()}</strong><br>`;
+                    dayEvents.forEach(event => {
+                        const statusText = event.status === 'planned' ? 'Плановое ТО' : 
+                                          event.status === 'upcoming' ? 'Приближается' : 'Просрочено';
+                        tooltipContent += `<strong>${event.taName}</strong> - ${statusText}<br>`;
+                    });
+                    
+                    tooltip.innerHTML = tooltipContent;
+                    dayElement.appendChild(tooltip);
+                    
+                    // Добавляем обработчик клика для показа информации о ТА
+                    dayElement.addEventListener('click', function() {
+                        if (dayEvents.length > 0) {
+                            showTAInfo(dayEvents[0].taId);
+                        }
+                    });
+                }
+                
+                // Выделяем текущий день
+                if (day === currentDate.getDate() && currentMonth === currentDate.getMonth()) {
+                    dayElement.style.border = '2px solid #3498db';
+                    dayElement.style.fontWeight = 'bold';
+                }
+                
+                singleMonthDays.appendChild(dayElement);
+            }
+        }
+        
+        // Отрисовка недельного календаря
+        function renderWeekCalendar() {
+            weekGrid.innerHTML = '';
+            
+            // Определяем начало текущей недели (понедельник)
+            const startOfWeek = new Date(currentDate);
+            const dayOfWeek = startOfWeek.getDay();
+            const diff = startOfWeek.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1);
+            startOfWeek.setDate(diff);
+            
+            // Создаем массив дней недели
+            const weekDays = [];
+            for (let i = 0; i < 7; i++) {
+                const day = new Date(startOfWeek);
+                day.setDate(startOfWeek.getDate() + i);
+                weekDays.push(day);
+            }
+            
+            // Получаем отфильтрованные события
+            const filteredEvents = getFilteredEvents();
+            
+            // Группируем события по ТА
+            const taEvents = {};
+            filteredEvents.forEach(event => {
+                if (!taEvents[event.taId]) {
+                    taEvents[event.taId] = [];
+                }
+                taEvents[event.taId].push(event);
+            });
+            
+            // Создаем строки для каждого ТА
+            Object.keys(taEvents).forEach(taId => {
+                const ta = technicalApparatuses.find(t => t.id === taId);
+                if (!ta) return;
+                
+                const taRow = document.createElement('div');
+                taRow.className = 'time-slot';
+                taRow.textContent = taId;
+                taRow.title = ta.name;
+                weekGrid.appendChild(taRow);
+                
+                // Создаем ячейки для каждого дня недели
+                for (let i = 0; i < 7; i++) {
+                    const dayCell = document.createElement('div');
+                    dayCell.className = 'week-day-events';
+                    
+                    // События для этого ТА в этот день
+                    const dayEvents = taEvents[taId].filter(event => {
+                        const eventDate = event.date;
+                        return eventDate.getDate() === weekDays[i].getDate() &&
+                               eventDate.getMonth() === weekDays[i].getMonth() &&
+                               eventDate.getFullYear() === weekDays[i].getFullYear();
+                    });
+                    
+                    // Добавляем события в ячейку
+                    dayEvents.forEach(event => {
+                        const eventElement = document.createElement('div');
+                        eventElement.className = 'event-item';
+                        
+                        // Определяем класс в зависимости от статуса
+                        if (event.status === 'planned') {
+                            eventElement.classList.add('event-green');
+                        } else if (event.status === 'upcoming') {
+                            eventElement.classList.add('event-yellow');
+                        } else if (event.status === 'overdue') {
+                            eventElement.classList.add('event-red');
+                        }
+                        
+                        eventElement.textContent = event.type === 'planned' ? 'Плановое ТО' : 'ТО по ресурсу';
+                        eventElement.title = event.details;
+                        
+                        // Добавляем обработчик клика
+                        eventElement.addEventListener('click', function() {
+                            showTAInfo(taId);
+                        });
+                        
+                        dayCell.appendChild(eventElement);
+                    });
+                    
+                    weekGrid.appendChild(dayCell);
+                }
+            });
+        }
+        
+        // Показать информацию о ТА в модальном окне
+        function showTAInfo(taId) {
+            const ta = technicalApparatuses.find(t => t.id === taId);
+            if (!ta) return;
+            
+            // Рассчитываем статус обслуживания
+            const nextServiceDate = new Date(ta.nextService);
+            const status = getEventStatus(nextServiceDate);
+            
+            // Форматируем даты
+            const formatDate = (dateString) => {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('ru-RU');
+            };
+            
+            // Определяем текст статуса
+            let statusText = '';
+            let statusClass = '';
+            
+            if (status === 'planned') {
+                statusText = 'Плановое ТО';
+                statusClass = 'status-planned';
+            } else if (status === 'upcoming') {
+                statusText = 'Приближающийся срок (менее 5 дней)';
+                statusClass = 'status-upcoming';
+            } else if (status === 'overdue') {
+                statusText = 'Просроченное мероприятие';
+                statusClass = 'status-overdue';
+            }
+            
+            // Заполняем модальное окно
+            taDetails.innerHTML = `
+                <div class="ta-detail">
+                    <div class="detail-label">ID аппарата:</div>
+                    <div class="detail-value">${ta.id}</div>
+                </div>
+                <div class="ta-detail">
+                    <div class="detail-label">Название:</div>
+                    <div class="detail-value">${ta.name}</div>
+                </div>
+                <div class="ta-detail">
+                    <div class="detail-label">Модель:</div>
+                    <div class="detail-value">${ta.model}</div>
+                </div>
+                <div class="ta-detail">
+                    <div class="detail-label">Место расположения:</div>
+                    <div class="detail-value">${ta.location}</div>
+                </div>
+                <div class="ta-detail">
+                    <div class="detail-label">Франчайзер:</div>
+                    <div class="detail-value">${ta.franchise}</div>
+                </div>
+                <div class="ta-detail">
+                    <div class="detail-label">Последняя проверка:</div>
+                    <div class="detail-value">${formatDate(ta.lastCheck)}</div>
+                </div>
+                <div class="ta-detail">
+                    <div class="detail-label">Межпроверочный интервал:</div>
+                    <div class="detail-value">${ta.interval} месяцев</div>
+                </div>
+                <div class="ta-detail">
+                    <div class="detail-label">Ресурс / Наработка:</div>
+                    <div class="detail-value">${ta.usage} / ${ta.resource} часов (${Math.round(ta.usage/ta.resource*100)}%)</div>
+                </div>
+                <div class="ta-detail">
+                    <div class="detail-label">Следующее ТО:</div>
+                    <div class="detail-value">${formatDate(ta.nextService)}</div>
+                </div>
+                <div class="ta-detail">
+                    <div class="detail-label">Статус:</div>
+                    <div class="detail-value">
+                        ${statusText}
+                        <div class="status-badge ${statusClass}">${statusText.split(' ')[0]}</div>
+                    </div>
+                </div>
+            `;
+            
+            // Показываем модальное окно
+            taInfoModal.style.display = 'flex';
+        }
+    </script>
+</body>
+</html>

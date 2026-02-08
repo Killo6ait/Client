@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Простой календарь с режимами отображения</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .description {
+            color: #7f8c8d;
+            max-width: 800px;
+            margin: 0 auto 20px;
+            font-size: 1.1rem;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .mode-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            background-color: #3498db;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            min-width: 120px;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn.active {
+            background-color: #2c3e50;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .navigation {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+        
+        .nav-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #ecf0f1;
+            color: #2c3e50;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-btn:hover {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .current-date {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #2c3e50;
+            min-width: 250px;
+            text-align: center;
+        }
+        
+        .calendar-container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+        
+        /* Стили для режима месяца */
+        .month-view {
+            width: 100%;
+        }
+        
+        .month-header {
+            display: flex;
+            justify-content: space-between;
+            background-color: #3498db;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .weekday {
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+        }
+        
+        .month-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+        
+        .day {
+            padding: 15px 10px;
+            text-align: center;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-height: 70px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+        }
+        
+        .day:hover {
+            background-color: #f0f7ff;
+            transform: scale(1.03);
+        }
+        
+        .day-number {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .day.other-month {
+            color: #bdc3c7;
+        }
+        
+        .day.today {
+            background-color: #e8f4fc;
+            color: #3498db;
+            font-weight: bold;
+        }
+        
+        .day.event {
+            position: relative;
+        }
+        
+        .day.event::after {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background-color: #e74c3c;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 10px;
+        }
+        
+        /* Стили для режима недели */
+        .week-view {
+            display: none;
+            width: 100%;
+        }
+        
+        .week-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+        
+        .week-day {
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .week-day-header {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .week-day.today {
+            background-color: #e8f4fc;
+        }
+        
+        /* Стили для режима года */
+        .year-view {
+            display: none;
+            width: 100%;
+        }
+        
+        .year-months {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+        
+        .year-month {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        
+        .year-month-name {
+            font-weight: bold;
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .year-month-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 3px;
+        }
+        
+        .year-day {
+            padding: 5px;
+            text-align: center;
+            font-size: 0.8rem;
+            border-radius: 3px;
+        }
+        
+        .year-day.other-month {
+            color: #bdc3c7;
+        }
+        
+        .year-day.today {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .events-list {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        .events-title {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .event-item {
+            padding: 15px;
+            border-left: 4px solid #3498db;
+            background-color: #f8f9fa;
+            margin-bottom: 10px;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .event-date {
+            font-weight: bold;
+            color: #3498db;
+            margin-bottom: 5px;
+        }
+        
+        .event-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            width: 100%;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        @media (max-width: 1024px) {
+            .year-months {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .year-months {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .week-days {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .mode-buttons {
+                flex-direction: column;
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .year-months {
+                grid-template-columns: 1fr;
+            }
+            
+            .month-days .day {
+                min-height: 50px;
+                padding: 8px 5px;
+            }
+            
+            .day-number {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Простой календарь</h1>
+            <p class="description">Интерактивный календарь с тремя режимами отображения: неделя, месяц и год. Переключайтесь между режимами, используя кнопки ниже.</p>
+        </header>
+        
+        <div class="controls">
+            <div class="mode-buttons">
+                <button class="btn active" id="monthBtn">Месяц</button>
+                <button class="btn" id="weekBtn">Неделя</button>
+                <button class="btn" id="yearBtn">Год</button>
+            </div>
+        </div>
+        
+        <div class="navigation">
+            <button class="nav-btn" id="prevBtn">←</button>
+            <div class="current-date" id="currentDate">Октябрь 2023</div>
+            <button class="nav-btn" id="nextBtn">→</button>
+        </div>
+        
+        <div class="calendar-container">
+            <!-- Режим месяца -->
+            <div class="month-view" id="monthView">
+                <div class="month-header">
+                    <div class="month-name">Октябрь 2023</div>
+                    <div class="month-days-count">30 дней</div>
+                </div>
+                
+                <div class="weekdays">
+                    <div class="weekday">Пн</div>
+                    <div class="weekday">Вт</div>
+                    <div class="weekday">Ср</div>
+                    <div class="weekday">Чт</div>
+                    <div class="weekday">Пт</div>
+                    <div class="weekday">Сб</div>
+                    <div class="weekday">Вс</div>
+                </div>
+                
+                <div class="month-days" id="monthDays">
+                    <!-- Дни месяца будут добавлены через JavaScript -->
+                </div>
+            </div>
+            
+            <!-- Режим недели -->
+            <div class="week-view" id="weekView">
+                <div class="week-days" id="weekDays">
+                    <!-- Дни недели будут добавлены через JavaScript -->
+                </div>
+            </div>
+            
+            <!-- Режим года -->
+            <div class="year-view" id="yearView">
+                <div class="year-months" id="yearMonths">
+                    <!-- Месяцы года будут добавлены через JavaScript -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="events-list">
+            <h2 class="events-title">Ближайшие события</h2>
+            <div id="eventsContainer">
+                <!-- События будут добавлены через JavaScript -->
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Простой календарь с режимами отображения (неделя/месяц/год) | Реализовано на HTML, CSS и JavaScript</p>
+    </footer>
+
+    <script>
+        // Текущая дата и режим отображения
+        let currentDate = new Date();
+        let currentMode = 'month';
+        
+        // Данные о событиях (для демонстрации)
+        const events = [
+            {date: new Date(2023, 9, 15), title: 'Встреча с командой', description: 'Обсуждение нового проекта'},
+            {date: new Date(2023, 9, 18), title: 'Презентация', description: 'Презентация результатов за квартал'},
+            {date: new Date(2023, 9, 22), title: 'Встреча с клиентом', description: 'Обсуждение требований к проекту'},
+            {date: new Date(2023, 9, 25), title: 'День рождения', description: 'День рождения коллеги'},
+            {date: new Date(2023, 10, 5), title: 'Конференция', description: 'Ежегодная технологическая конференция'},
+            {date: new Date(2023, 10, 12), title: 'Деловая встреча', description: 'Встреча с партнерами'},
+            {date: new Date(2023, 11, 25), title: 'Новый год', description: 'Подготовка к празднованию'}
+        ];
+        
+        // Элементы DOM
+        const monthView = document.getElementById('monthView');
+        const weekView = document.getElementById('weekView');
+        const yearView = document.getElementById('yearView');
+        const monthBtn = document.getElementById('monthBtn');
+        const weekBtn = document.getElementById('weekBtn');
+        const yearBtn = document.getElementById('yearBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const currentDateEl = document.getElementById('currentDate');
+        const monthDays = document.getElementById('monthDays');
+        const weekDays = document.getElementById('weekDays');
+        const yearMonths = document.getElementById('yearMonths');
+        const eventsContainer = document.getElementById('eventsContainer');
+        
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCalendar();
+            setupEventListeners();
+        });
+        
+        // Настройка обработчиков событий
+        function setupEventListeners() {
+            monthBtn.addEventListener('click', () => switchMode('month'));
+            weekBtn.addEventListener('click', () => switchMode('week'));
+            yearBtn.addEventListener('click', () => switchMode('year'));
+            
+            prevBtn.addEventListener('click', navigatePrev);
+            nextBtn.addEventListener('click', navigateNext);
+        }
+        
+        // Переключение режима отображения
+        function switchMode(mode) {
+            currentMode = mode;
+            
+            // Обновляем активную кнопку
+            monthBtn.classList.remove('active');
+            weekBtn.classList.remove('active');
+            yearBtn.classList.remove('active');
+            
+            if (mode === 'month') {
+                monthBtn.classList.add('active');
+                monthView.style.display = 'block';
+                weekView.style.display = 'none';
+                yearView.style.display = 'none';
+            } else if (mode === 'week') {
+                weekBtn.classList.add('active');
+                monthView.style.display = 'none';
+                weekView.style.display = 'block';
+                yearView.style.display = 'none';
+            } else if (mode === 'year') {
+                yearBtn.classList.add('active');
+                monthView.style.display = 'none';
+                weekView.style.display = 'none';
+                yearView.style.display = 'block';
+            }
+            
+            updateCalendar();
+        }
+        
+        // Навигация назад
+        function navigatePrev() {
+            if (currentMode === 'month') {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+            } else if (currentMode === 'week') {
+                currentDate.setDate(currentDate.getDate() - 7);
+            } else if (currentMode === 'year') {
+                currentDate.setFullYear(currentDate.getFullYear() - 1);
+            }
+            
+            updateCalendar();
+        }
+        
+        // Навигация вперед
+        function navigateNext() {
+            if (currentMode === 'month') {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+            } else if (currentMode === 'week') {
+                currentDate.setDate(currentDate.getDate() + 7);
+            } else if (currentMode === 'year') {
+                currentDate.setFullYear(currentDate.getFullYear() + 1);
+            }
+            
+            updateCalendar();
+        }
+        
+        // Обновление календаря в зависимости от режима
+        function updateCalendar() {
+            updateCurrentDateDisplay();
+            
+            if (currentMode === 'month') {
+                renderMonthView();
+            } else if (currentMode === 'week') {
+                renderWeekView();
+            } else if (currentMode === 'year') {
+                renderYearView();
+            }
+            
+            renderEvents();
+        }
+        
+        // Обновление отображения текущей даты
+        function updateCurrentDateDisplay() {
+            const options = { year: 'numeric', month: 'long' };
+            
+            if (currentMode === 'month') {
+                currentDateEl.textContent = currentDate.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
+            } else if (currentMode === 'week') {
+                const weekStart = getWeekStart(currentDate);
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekEnd.getDate() + 6);
+                
+                const startStr = weekStart.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+                const endStr = weekEnd.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' });
+                currentDateEl.textContent = `${startStr} - ${endStr}`;
+            } else if (currentMode === 'year') {
+                currentDateEl.textContent = currentDate.toLocaleDateString('ru-RU', { year: 'numeric' });
+            }
+        }
+        
+        // Получение начала недели для заданной даты
+        function getWeekStart(date) {
+            const day = date.getDay();
+            const diff = date.getDate() - day + (day === 0 ? -6 : 1); // Понедельник как начало недели
+            return new Date(date.setDate(diff));
+        }
+        
+        // Отображение календаря в режиме месяца
+        function renderMonthView() {
+            // Очищаем контейнер
+            monthDays.innerHTML = '';
+            
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            // Первый день месяца
+            const firstDay = new Date(year, month, 1);
+            // Последний день месяца
+            const lastDay = new Date(year, month + 1, 0);
+            
+            // День недели первого дня месяца (0 - воскресенье, 1 - понедельник, ...)
+            let firstDayOfWeek = firstDay.getDay();
+            // Преобразуем так, чтобы понедельник был 0
+            firstDayOfWeek = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
+            
+            // Количество дней в месяце
+            const daysInMonth = lastDay.getDate();
+            
+            // Количество дней в предыдущем месяце
+            const prevMonthLastDay = new Date(year, month, 0).getDate();
+            
+            // Заполняем дни предыдущего месяца
+            for (let i = 0; i < firstDayOfWeek; i++) {
+                const day = document.createElement('div');
+                day.className = 'day other-month';
+                day.textContent = prevMonthLastDay - firstDayOfWeek + i + 1;
+                monthDays.appendChild(day);
+            }
+            
+            // Заполняем дни текущего месяца
+            const today = new Date();
+            for (let i = 1; i <= daysInMonth; i++) {
+                const day = document.createElement('div');
+                day.className = 'day';
+                day.innerHTML = `<div class="day-number">${i}</div>`;
+                
+                // Проверяем, является ли день сегодняшним
+                if (year === today.getFullYear() && month === today.getMonth() && i === today.getDate()) {
+                    day.classList.add('today');
+                }
+                
+                // Проверяем, есть ли события в этот день
+                const dayDate = new Date(year, month, i);
+                if (hasEventOnDate(dayDate)) {
+                    day.classList.add('event');
+                }
+                
+                monthDays.appendChild(day);
+            }
+            
+            // Заполняем дни следующего месяца
+            const totalCells = 42; // 6 строк * 7 дней
+            const remainingCells = totalCells - (firstDayOfWeek + daysInMonth);
+            
+            for (let i = 1; i <= remainingCells; i++) {
+                const day = document.createElement('div');
+                day.className = 'day other-month';
+                day.textContent = i;
+                monthDays.appendChild(day);
+            }
+            
+            // Обновляем заголовок месяца
+            const monthName = currentDate.toLocaleDateString('ru-RU', { month: 'long' });
+            document.querySelector('.month-name').textContent = `${monthName} ${year}`;
+            document.querySelector('.month-days-count').textContent = `${daysInMonth} дней`;
+        }
+        
+        // Отображение календаря в режиме недели
+        function renderWeekView() {
+            // Очищаем контейнер
+            weekDays.innerHTML = '';
+            
+            const weekStart = getWeekStart(new Date(currentDate));
+            const today = new Date();
+            
+            // Дни недели
+            const daysOfWeek = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
+            
+            for (let i = 0; i < 7; i++) {
+                const dayDate = new Date(weekStart);
+                dayDate.setDate(dayDate.getDate() + i);
+                
+                const dayElement = document.createElement('div');
+                dayElement.className = 'week-day';
+                
+                // Проверяем, является ли день сегодняшним
+                if (dayDate.toDateString() === today.toDateString()) {
+                    dayElement.classList.add('today');
+                }
+                
+                const dayName = daysOfWeek[i];
+                const dayNumber = dayDate.getDate();
+                const monthName = dayDate.toLocaleDateString('ru-RU', { month: 'short' });
+                
+                dayElement.innerHTML = `
+                    <div class="week-day-header">
+                        <div>${dayName}</div>
+                        <div>${dayNumber} ${monthName}</div>
+                    </div>
+                `;
+                
+                // Добавляем события на этот день
+                const dayEvents = getEventsOnDate(dayDate);
+                dayEvents.forEach(event => {
+                    const eventElement = document.createElement('div');
+                    eventElement.className = 'week-event';
+                    eventElement.textContent = event.title;
+                    eventElement.style.cssText = 'background-color: #3498db; color: white; padding: 5px; margin: 2px 0; border-radius: 4px; font-size: 0.8rem;';
+                    dayElement.appendChild(eventElement);
+                });
+                
+                weekDays.appendChild(dayElement);
+            }
+        }
+        
+        // Отображение календаря в режиме года
+        function renderYearView() {
+            // Очищаем контейнер
+            yearMonths.innerHTML = '';
+            
+            const year = currentDate.getFullYear();
+            const today = new Date();
+            
+            for (let month = 0; month < 12; month++) {
+                const monthElement = document.createElement('div');
+                monthElement.className = 'year-month';
+                
+                const monthName = new Date(year, month, 1).toLocaleDateString('ru-RU', { month: 'long' });
+                monthElement.innerHTML = `<div class="year-month-name">${monthName}</div>`;
+                
+                const daysContainer = document.createElement('div');
+                daysContainer.className = 'year-month-days';
+                
+                // Первый день месяца
+                const firstDay = new Date(year, month, 1);
+                // День недели первого дня месяца (0 - воскресенье, 1 - понедельник, ...)
+                let firstDayOfWeek = firstDay.getDay();
+                // Преобразуем так, чтобы понедельник был 0
+                firstDayOfWeek = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
+                
+                // Количество дней в месяце
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                
+                // Заполняем пустые ячейки в начале месяца
+                for (let i = 0; i < firstDayOfWeek; i++) {
+                    const emptyDay = document.createElement('div');
+                    emptyDay.className = 'year-day other-month';
+                    emptyDay.textContent = '';
+                    daysContainer.appendChild(emptyDay);
+                }
+                
+                // Заполняем дни месяца
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dayElement = document.createElement('div');
+                    dayElement.className = 'year-day';
+                    dayElement.textContent = day;
+                    
+                    // Проверяем, является ли день сегодняшним
+                    if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
+                        dayElement.classList.add('today');
+                    }
+                    
+                    daysContainer.appendChild(dayElement);
+                }
+                
+                monthElement.appendChild(daysContainer);
+                yearMonths.appendChild(monthElement);
+            }
+        }
+        
+        // Отображение событий
+        function renderEvents() {
+            eventsContainer.innerHTML = '';
+            
+            // Фильтруем события, начиная с текущей даты
+            const upcomingEvents = events
+                .filter(event => event.date >= currentDate)
+                .sort((a, b) => a.date - b.date)
+                .slice(0, 5); // Показываем только 5 ближайших событий
+            
+            if (upcomingEvents.length === 0) {
+                eventsContainer.innerHTML = '<p>Нет предстоящих событий</p>';
+                return;
+            }
+            
+            upcomingEvents.forEach(event => {
+                const eventDateStr = event.date.toLocaleDateString('ru-RU', { 
+                    weekday: 'long', 
+                    day: 'numeric', 
+                    month: 'long', 
+                    year: 'numeric' 
+                });
+                
+                const eventElement = document.createElement('div');
+                eventElement.className = 'event-item';
+                eventElement.innerHTML = `
+                    <div class="event-date">${eventDateStr}</div>
+                    <div class="event-title">${event.title}</div>
+                    <div class="event-description">${event.description}</div>
+                `;
+                
+                eventsContainer.appendChild(eventElement);
+            });
+        }
+        
+        // Проверка, есть ли события на указанную дату
+        function hasEventOnDate(date) {
+            return events.some(event => 
+                event.date.getDate() === date.getDate() &&
+                event.date.getMonth() === date.getMonth() &&
+                event.date.getFullYear() === date.getFullYear()
+            );
+        }
+        
+        // Получение событий на указанную дату
+        function getEventsOnDate(date) {
+            return events.filter(event => 
+                event.date.getDate() === date.getDate() &&
+                event.date.getMonth() === date.getMonth() &&
+                event.date.getFullYear() === date.getFullYear()
+            );
+        }
+    </script>
+</body>
+</html>
